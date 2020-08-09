@@ -23,8 +23,8 @@ startApp = () => {
       message: "What would you like to do?",
       choices: [
         "View all employees",
-        // "View all employees by department",
-        // // // "View all employees by manager",
+        "View all employees by department",
+        // // "View all employees by manager",
         // "Add employee",
         // // // "Remove employee",
         // "Update employee role",
@@ -43,9 +43,9 @@ startApp = () => {
           viewEmployees();
           break;
 
-        // case "View all employees by department":
-        //   viewEmployeeByDepartment();
-        //   break;
+        case "View all employees by department":
+          viewEmployeeByDepartment();
+          break;
 
         // case "Add employee":
         //   addEmployee();
@@ -85,4 +85,18 @@ viewEmployees = () => {
     console.table(data);
     startApp();
   });
+}
+
+viewEmployeeByDepartment = () => {
+  const query = `SELECT first_name, last_name, name AS department, salary 
+  FROM employee AS e 
+  LEFT JOIN role AS r ON e.role_id = r.id 
+  LEFT JOIN department AS d ON d.id = r.department_id 
+  ORDER BY department`
+  connection.query(query, (err, data) => {
+    if (err) throw err;
+
+    console.table(data);
+    startApp();
+  })
 }
