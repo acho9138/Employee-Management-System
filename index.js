@@ -29,7 +29,7 @@ startApp = () => {
         // // // "Remove employee",
         // "Update employee role",
         // // // "Update employee manger",
-        // "View all roles",
+        "View all roles",
         // "Add role",
         // // "Remove role",
         // "Add department",
@@ -55,9 +55,9 @@ startApp = () => {
         //   updateRole();
         //   break;
 
-        // case "View all roles":
-        //   viewRoles();
-        //   break;
+        case "View all roles":
+          viewRoles();
+          break;
 
         // case "Add role":
         //   addRole();
@@ -93,6 +93,16 @@ viewEmployeeByDepartment = () => {
   LEFT JOIN role AS r ON e.role_id = r.id 
   LEFT JOIN department AS d ON d.id = r.department_id 
   ORDER BY department`
+  connection.query(query, (err, data) => {
+    if (err) throw err;
+
+    console.table(data);
+    startApp();
+  })
+}
+
+viewRoles = () => {
+  const query = "SELECT id, title, salary FROM employee_db.role"
   connection.query(query, (err, data) => {
     if (err) throw err;
 
