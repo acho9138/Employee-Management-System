@@ -2,14 +2,13 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const cTable = require("console.table");
-const Util = require('util');
 
 // Connection to MySQL
 const connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
   user: "root",
-  password: "liaCM345!",
+  password: "",
   database: "employee_db"
 });
 
@@ -18,8 +17,6 @@ connection.connect(err => {
   if (err) throw err;
   startApp();
 });
-
-const query = Util.promisify(connection.query.bind(connection));
 
 // Start app with initial question
 startApp = () => {
@@ -182,33 +179,33 @@ updateRole = () => {
 }
 
 // Add new information to database
-addRole = () => {
-  inquirer
-    .prompt(
-      {
-        name: "name",
-        type: "input",
-        message: "What is the name of the role?"
-      },
-      {
-        name: "salary",
-        type: "input",
-        message: "What is the salary of the role?"
-      },
-      {
-        name: "department",
-        type: "list",
-        message: "Which department does the role belong to?",
-        choices: []
-      }
-    ).then((results) => {
-      const query = "INSERT INTO role (title, salary) VALUES (?, ?)"
-      connection.query(query, [results.name, results.salary], (err, data) => {
-        if (err) throw err;
+// addRole = () => {
+//   inquirer
+//     .prompt(
+//       {
+//         name: "name",
+//         type: "input",
+//         message: "What is the name of the role?"
+//       },
+//       {
+//         name: "salary",
+//         type: "input",
+//         message: "What is the salary of the role?"
+//       },
+//       {
+//         name: "department",
+//         type: "list",
+//         message: "Which department does the role belong to?",
+//         choices: []
+//       }
+//     ).then((results) => {
+//       const query = "INSERT INTO role (title, salary) VALUES (?, ?)"
+//       connection.query(query, [results.name, results.salary], (err, data) => {
+//         if (err) throw err;
 
-      })
-    })
-}
+//       })
+//     })
+// }
 
 // addEmployee = () => {
 //   inquirer
