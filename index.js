@@ -36,7 +36,7 @@ startApp = () => {
         "View all roles",
         // "Add role",
         // // "Remove role",
-        // "Add department",
+        "Add department",
         // // "Remove department",
         "Exit"
       ]
@@ -63,13 +63,13 @@ startApp = () => {
           viewRoles();
           break;
 
-        case "Add role":
-          addRole();
-          break;
+        // case "Add role":
+        //   addRole();
+        //   break;
 
-        // case "Add department":
-        //   addDepartment();
-        // break;
+        case "Add department":
+          addDepartment();
+        break;
 
         case "Exit":
           connection.end();
@@ -146,8 +146,7 @@ updateRole = () => {
         }]
       ).then((results) => {
         const getRoleIdQuery = `
-          SELECT id
-          FROM role
+          SELECT id FROM role
           WHERE title = ?
         `
         connection.query(getRoleIdQuery,[
@@ -179,8 +178,30 @@ updateRole = () => {
 }
 
 // Add new information to database
+addDepartment = () => {
+  inquirer
+    .prompt(
+      {
+        name: "newDepartment",
+        type: "input",
+        message: "What is the name of the new department?"
+      }
+    )
+    .then((results) => {
+      const query = `INSERT INTO department (name) VALUES (?)`
+      connection.query(query, [results.newDepartment], (err, data) => {
+        if (err) throw err;
+        else {
+          console.log("Successfully added new department");
+          startApp();
+        }
+      })
+    })
+}
+
 // addRole = () => {
-//   inquirer
+//   renderDepartmentsInDB((departmentArray) => {
+//     inquirer
 //     .prompt(
 //       {
 //         name: "name",
@@ -196,7 +217,7 @@ updateRole = () => {
 //         name: "department",
 //         type: "list",
 //         message: "Which department does the role belong to?",
-//         choices: []
+//         choices: departmentArray
 //       }
 //     ).then((results) => {
 //       const query = "INSERT INTO role (title, salary) VALUES (?, ?)"
@@ -205,6 +226,7 @@ updateRole = () => {
 
 //       })
 //     })
+//   }) 
 // }
 
 // addEmployee = () => {
