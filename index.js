@@ -28,16 +28,11 @@ startApp = () => {
       choices: [
         "View all employees",
         "View all employees by department",
-        // // "View all employees by manager",
-        // "Add employee",
-        // // // "Remove employee",
+        "Add employee",
         "Update employee role",
-        // // // "Update employee manger",
         "View all roles",
         "Add role",
-        // // "Remove role",
         "Add department",
-        // // "Remove department",
         "Exit"
       ]
     })
@@ -51,9 +46,9 @@ startApp = () => {
           viewEmployeeByDepartment();
           break;
 
-        // case "Add employee":
-        //   addEmployee();
-        //   break;
+        case "Add employee":
+          addEmployee();
+          break;
 
         case "Update employee role":
           updateRole();
@@ -176,7 +171,7 @@ updateRole = () => {
   })
 }
 
-// Add new information to database
+// Add new department to database
 addDepartment = () => {
   inquirer
     .prompt(
@@ -198,7 +193,7 @@ addDepartment = () => {
     })
 }
 
-// Add a new role
+// Add a new role to database
 addRole = () => {
   renderDepartmentsInDB((departmentArray) => {
     inquirer
@@ -240,43 +235,96 @@ addRole = () => {
   })
 }
 
-// addEmployee = () => {
-//   inquirer
-//     .prompt(
-//       {
-//         name: "firstName",
-//         type: "input",
-//         message: "What is the employee's first name?"
-//       },
-//       {
-//         name: "lastName",
-//         type: "input",
-//         message: "What is the employee's last name?"
-//       },
-//       {
-//         name: "role",
-//         type: "input",
-//         message: "What is the employee's role?"
-//       },
-//       {
-//         name: "department",
-//         type: "input",
-//         message: "What department does the employee work in?"
-//       }
-//     ).then(answer => {
-//       const query = "INSERT INTO employee SET ?"
-//       connection.query(query,
-//         {
-//           first_name: answer.firstName,
-//           last_name: answer.lastName,
-//           role_id: answer.role
-//         },
-//         (err, data) => {
-//           if (err) throw err;
-//         })
-//     })
+// Add new employee to database
+addEmployee = () => {
+  renderRolesInDB((rolesArray) => {
+    renderEmployeesInDB((employeeArray) => {
+      employeeArray.push("None");
+      inquirer
+        .prompt([
+          {
+            name: "firstName",
+            type: "input",
+            message: "What is the employee's first name?"
+          },
+          {
+            name: "lastName",
+            type: "input",
+            message: "What is the employee's last name?"
+          },
+          {
+            name: "role",
+            type: "list",
+            message: "What is the employee's role?",
+            choices: rolesArray
+          },
+          {
+            name: "manager",
+            type: "list",
+            message: "Who is the employee's manager?",
+            choices: employeeArray
+          }
+        ]).then(results => {
+          const getRoleIdQuery = `
+            SELECT id FROM role
+            WHERE title = ?`
+          connection.query(getRoleIdQuery, [results.role], (err, data1) => {
+            if (err) throw err;
+            else {
+              if (results.manager !== "None") {
+                const getManagerIdQuery = `
+                  SELECT e.id FROM employee AS e
+                  WHERE e.first_name = ?
+                  AND e.last_name = ?`
+                connection.query(getManagerIdQuery,
+                  [
+                    results.manager.split(" ")[0],
+                    results.manager.split(" ")[1]
+                  ],
+                  (err, data2) => {
+                    if (err) throw err;
+                    console.log(results.firstName)
+                    console.log(results.lastName)
+                    const query = `
+                      INSERT INTO employee
+                      SET ?`
+                    connection.query(query,
+                      {
+                        first_name: results.firstName,
+                        last_name: results.lastName,
+                        role_id: data1[0].id,
+                        manager_id: data2[0].id
+                      },
+                      (err, data) => {
+                        if (err) throw err;
+                        console.log("==== Successfully added new employee ====");
+                        startApp();
+                      })
+                  }
+                )
+              } else if (results.manager === "None") {
+                const query = `
+                  INSERT INTO employee
+                  SET ?`
+                connection.query(query,
+                  {
+                    first_name: results.firstName,
+                    last_name: results.lastName,
+                    role_id: data1[0].id
+                  },
+                  (err, data) => {
+                    if (err) throw err;
+                    console.log("==== Successfully added new employee ====");
+                    startApp();
+                  })
+              }
 
-// }
+            }
+          })
+        })
+    })
+  })
+}
 
 // Render information from database to generate options for questions
 renderDepartmentsInDB = (callback) => {
