@@ -1,4 +1,4 @@
-// npm libraries
+// Node libraries
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const cTable = require("console.table");
@@ -34,7 +34,7 @@ startApp = () => {
         "Update employee role",
         // // // "Update employee manger",
         "View all roles",
-        // "Add role",
+        "Add role",
         // // "Remove role",
         "Add department",
         // // "Remove department",
@@ -63,13 +63,13 @@ startApp = () => {
           viewRoles();
           break;
 
-        // case "Add role":
-        //   addRole();
-        //   break;
+        case "Add role":
+          addRole();
+          break;
 
         case "Add department":
           addDepartment();
-        break;
+          break;
 
         case "Exit":
           connection.end();
@@ -78,7 +78,7 @@ startApp = () => {
     });
 }
 
-// View options in database
+// View all employees
 viewEmployees = () => {
   const query = `SELECT e.id, first_name, last_name, title, name AS department, salary, manager_id AS manager 
   FROM employee AS e
@@ -92,6 +92,7 @@ viewEmployees = () => {
   });
 }
 
+// View employees in specific department
 viewEmployeeByDepartment = () => {
   renderDepartmentsInDB((departmentArray) => {
     const query = `SELECT first_name, last_name, name AS department, salary 
@@ -115,6 +116,7 @@ viewEmployeeByDepartment = () => {
   })
 }
 
+// View available roles
 viewRoles = () => {
   const query = `SELECT role.id, title, name AS department, salary FROM employee_db.role 
   LEFT JOIN department
@@ -127,7 +129,7 @@ viewRoles = () => {
   })
 }
 
-// Update information in database
+// Update employee role
 updateRole = () => {
   renderEmployeesInDB((employeeArray) => {
     renderRolesInDB((rolesArray) => {
@@ -147,30 +149,27 @@ updateRole = () => {
       ).then((results) => {
         const getRoleIdQuery = `
           SELECT id FROM role
-          WHERE title = ?
-        `
-        connection.query(getRoleIdQuery,[
-          results.newRole,
-        ],
-          (err, data) => {
-            if (err) throw err;
-            else {
-              const setRoleIdQuery = `
+          WHERE title = ?`
+        connection.query(getRoleIdQuery, [results.newRole], (err, data) => {
+          if (err) throw err;
+          else {
+            const setRoleIdQuery = `
                 UPDATE employee
                 SET employee.role_id = ?
                 WHERE employee.first_name = ?
                 AND employee.last_name = ?
               `
-              connection.query(setRoleIdQuery,[
-                data[0].id,
-                results.employee.split(" ")[0],
-                results.employee.split(" ")[1]
-              ],
-                (err, data) => {
-                  if (err) throw err;
-                  startApp();
+            connection.query(setRoleIdQuery, [
+              data[0].id,
+              results.employee.split(" ")[0],
+              results.employee.split(" ")[1]
+            ],
+              (err, data) => {
+                if (err) throw err;
+                console.log("==== Successfully updated the employee's role ====");
+                startApp();
               })
-            }
+          }
         })
       })
     })
@@ -192,42 +191,54 @@ addDepartment = () => {
       connection.query(query, [results.newDepartment], (err, data) => {
         if (err) throw err;
         else {
-          console.log("Successfully added new department");
+          console.log("==== Successfully added new department ====");
           startApp();
         }
       })
     })
 }
 
-// addRole = () => {
-//   renderDepartmentsInDB((departmentArray) => {
-//     inquirer
-//     .prompt(
-//       {
-//         name: "name",
-//         type: "input",
-//         message: "What is the name of the role?"
-//       },
-//       {
-//         name: "salary",
-//         type: "input",
-//         message: "What is the salary of the role?"
-//       },
-//       {
-//         name: "department",
-//         type: "list",
-//         message: "Which department does the role belong to?",
-//         choices: departmentArray
-//       }
-//     ).then((results) => {
-//       const query = "INSERT INTO role (title, salary) VALUES (?, ?)"
-//       connection.query(query, [results.name, results.salary], (err, data) => {
-//         if (err) throw err;
-
-//       })
-//     })
-//   }) 
-// }
+// Add a new role
+addRole = () => {
+  renderDepartmentsInDB((departmentArray) => {
+    inquirer
+      .prompt([
+        {
+          name: "roleName",
+          type: "input",
+          message: "What is the name of the role?"
+        },
+        {
+          name: "salary",
+          type: "input",
+          message: "What is the salary of the role?"
+        },
+        {
+          name: "department",
+          type: "list",
+          message: "Which department does the role belong to?",
+          choices: departmentArray
+        }
+      ]).then((results) => {
+        const getDepartmentIdQuery = `
+          SELECT id FROM department
+          WHERE name = ?`
+        connection.query(getDepartmentIdQuery, [results.department], (err, data) => {
+          if (err) throw err;
+          else {
+            const query = `
+              INSERT INTO role (title, salary, department_id) 
+              VALUES (?, ?, ?)`
+            connection.query(query, [results.roleName, results.salary, data[0].id], (err, data) => {
+              if (err) throw err;
+              console.log("==== Successfully added a new role ====");
+              startApp();
+            })
+          }
+        })
+      })
+  })
+}
 
 // addEmployee = () => {
 //   inquirer
