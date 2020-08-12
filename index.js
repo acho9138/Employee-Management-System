@@ -15,6 +15,7 @@ const connection = mysql.createConnection({
 // Start connection
 connection.connect(err => {
   if (err) throw err;
+  console.log("Welcome to the employee management system!");
   startApp();
 });
 
@@ -283,8 +284,6 @@ addEmployee = () => {
                   ],
                   (err, data2) => {
                     if (err) throw err;
-                    console.log(results.firstName)
-                    console.log(results.lastName)
                     const query = `
                       INSERT INTO employee
                       SET ?`
