@@ -17,6 +17,10 @@
   },
   "homepage": "https://github.com/acho9138/Employee-Management-System#readme",
   "devDependencies": {
-    "inquirer": "^7.3.3"
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1"
+  },
+  "dependencies": {
+    "console.table": "^0.10.0"
   }
 }
